@@ -37,7 +37,7 @@ function listLaborers() {
     	url: 'laborer/getLaborers.jsp',
     	dataType: 'json',
     	success: data => {
-    		laborers = data.laborers
+    		let laborers = data.laborers
     		
     	    if(laborers.length) {
     	        const laborerArr = []
@@ -59,40 +59,43 @@ function listLaborers() {
     	        '<tr><td colspan=4 class=text-center>노동자가 없습니다.</td></tr>')
     	} 
     })
-
-
 }
 
 function init() {
 	listLaborers()
+	
+	// 노동자 추가
     $('#addLaborerBtn').click(() => {
         if(isVal($('#laborerName')) && isVal($('#hireDate'))) {
             let laborer = {
-                laborerId: ++laborerId,
                 name: $('#laborerName').val(),
                 hireDate: $('#hireDate').val()
             }
-
-            laborers.push(laborer)
-            listLaborers()
+			
+            $.ajax({
+            	url: 'laborer/addLaborer.jsp',
+            	data: laborer,
+            	success: listLaborers
+            })
         }
     })
-
+	
+    // 노동자 수정
     $('#fixLaborerBtn').click(() => {
         if(isVal($('#laborerId:checked')) &&
             isVal($('#laborerName')) && isVal($('#hireDate'))) {
-                let laborerId = $('#laborerId:checked').val()
-
-                $.each(laborers, (i, laborer) => {
-                    if(laborer.laborerId == laborerId) {
-                        laborer.name = $('#laborerName').val()
-                        laborer.hireDate = $('#hireDate').val()
-                        return false
-                    }
-                })
-
-                listLaborers()
+            let laborer = {
+            	laborerId: $('#laborerId:checked').val(),
+            	name: $('#laborerName').val(),
+            	hireDate: $('#hireDate').val()
             }
+            
+            $.ajax({
+            	url: 'laborer/fixLaborer.jsp',
+            	data: laborer,
+            	success: listLaborers
+            })
+        }
     })
 
     $('#delLaborerBtn').click(() => {
@@ -104,17 +107,12 @@ function init() {
     })
 
     $('#delLaborerOkBtn').click(() => {
-        let laborerId = $('#laborerId:checked').val()
-
-        $.each(laborers, (i, laborer) => {
-            if(laborer.laborerId == laborerId) {
-                laborers.splice(i, 1)
-                return false
-            }
+        $.ajax({
+        	url: 'laborer/delLaborer.jsp',
+        	data: {laborerId: $('#laborerId:checked').val()},
+        	success: listLaborers
         })
-
         $('#modal').modal('hide')
-        listLaborers()
     })
 
     $('#laborers').on({
